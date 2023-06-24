@@ -6,8 +6,8 @@ import "openzeppelin-contracts/utils/Counters.sol";
 import "openzeppelin-contracts/access/Ownable.sol";
 import "tokenbound/AccountRegistry.sol";
 
-// Soulbound ERC721 token for MyPuddle profiles
-contract MyPuddle is ERC721, Ownable {
+// Soulbound ERC721 token for AquaNet profiles
+contract AquaNet is ERC721, Ownable {
     using Counters for Counters.Counter;
 
     struct Token {
@@ -20,7 +20,7 @@ contract MyPuddle is ERC721, Ownable {
     mapping(address => uint256) public addressToTokenId;
     mapping(uint256 => Token) public puddleIdToToken;
 
-    constructor(address tokenBoundRegistry_) ERC721("MyPuddle", "PUDDLE") {
+    constructor(address tokenBoundRegistry_) ERC721("AquaNet", "AQUA") {
         tokenBoundRegistry = tokenBoundRegistry_;
     }
 
@@ -38,7 +38,7 @@ contract MyPuddle is ERC721, Ownable {
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
-        return "https://api.mypuddle.com/token/";
+        return "https:/token.aquanet.app/";
     }
 
     function safeMint(
@@ -70,7 +70,7 @@ contract MyPuddle is ERC721, Ownable {
         _burn(tokenId);
     }
 
-    // The owner (TBA) can burn its own MyPuddle token
+    // The owner (TBA) can burn its own AquaNet token
     function burn(uint tokenId) external {
         require(
             msg.sender == ownerOf(tokenId),

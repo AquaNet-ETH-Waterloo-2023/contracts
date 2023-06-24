@@ -8,21 +8,21 @@ import "tokenbound/CrossChainExecutorList.sol";
 import "./mocks/MockERC721.sol";
 import "./mocks/MockERC20.sol";
 
-import "src/MyPuddle.sol";
+import "src/AquaNet.sol";
 
-contract MyPuddleTest is Test {
+contract AquaNetTest is Test {
     CrossChainExecutorList ccExecutorList;
     TBA implementation;
     AccountRegistry public accountRegistry;
 
-    MyPuddle public puddle;
+    AquaNet public aqua;
 
     function setUp() public {
         ccExecutorList = new CrossChainExecutorList();
         implementation = new TBA(address(ccExecutorList));
         accountRegistry = new AccountRegistry(address(implementation));
 
-        puddle = new MyPuddle(address(accountRegistry));
+        aqua = new AquaNet(address(accountRegistry));
     }
 
     function testCanOnlyMintOnce() public {
@@ -30,9 +30,9 @@ contract MyPuddleTest is Test {
         mock.mint(address(1337), 1);
 
         vm.startPrank(address(1337));
-        puddle.safeMint(address(mock), 1);
+        aqua.safeMint(address(mock), 1);
         vm.expectRevert("This address already has a token.");
-        puddle.safeMint(address(mock), 1);
+        aqua.safeMint(address(mock), 1);
         vm.stopPrank();
     }
 
@@ -40,7 +40,7 @@ contract MyPuddleTest is Test {
     function testTokenAddressMustBeERC721(address tokenAddress) public {
         vm.startPrank(address(1337));
         vm.expectRevert();
-        puddle.safeMint(tokenAddress, 1);
+        aqua.safeMint(tokenAddress, 1);
         vm.stopPrank();
     }
 
@@ -49,7 +49,7 @@ contract MyPuddleTest is Test {
         MockERC20 mock = new MockERC20();
         vm.startPrank(address(1337));
         vm.expectRevert();
-        puddle.safeMint(address(mock), 1);
+        aqua.safeMint(address(mock), 1);
         vm.stopPrank();
     }
 
@@ -61,7 +61,7 @@ contract MyPuddleTest is Test {
         mock.setApprovalForAll(address(8008), true);
 
         vm.prank(address(8008));
-        puddle.safeMint(address(mock), 1);
+        aqua.safeMint(address(mock), 1);
 
         vm.prank(address(1337));
         mock.setApprovalForAll(address(8008), false);
@@ -70,7 +70,7 @@ contract MyPuddleTest is Test {
             "You must be the owner or approved to perform this action."
         );
         vm.prank(address(8008));
-        puddle.safeMint(address(mock), 1);
+        aqua.safeMint(address(mock), 1);
     }
 
     function testSingleApprovalAllowsMint() public {
@@ -82,7 +82,7 @@ contract MyPuddleTest is Test {
         mock.approve(address(8008), tokenId);
 
         vm.prank(address(8008));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         vm.prank(address(1337));
         mock.approve(address(0), tokenId);
@@ -91,7 +91,7 @@ contract MyPuddleTest is Test {
             "You must be the owner or approved to perform this action."
         );
         vm.prank(address(8008));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
     }
 
     function testApprovedAddressCanBurn() public {
@@ -103,10 +103,10 @@ contract MyPuddleTest is Test {
         mock.approve(address(8008), tokenId);
 
         vm.prank(address(1337));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         vm.prank(address(8008));
-        puddle.burnAsEOA(address(mock), tokenId);
+        aqua.burnAsEOA(address(mock), tokenId);
     }
 
     function testOwnerCanBurn() public {
@@ -115,10 +115,10 @@ contract MyPuddleTest is Test {
         mock.mint(address(1337), tokenId);
 
         vm.prank(address(1337));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         vm.prank(address(1337));
-        puddle.burnAsEOA(address(mock), tokenId);
+        aqua.burnAsEOA(address(mock), tokenId);
     }
 
     function testApprovedForAllAddressCanBurn() public {
@@ -130,10 +130,10 @@ contract MyPuddleTest is Test {
         mock.setApprovalForAll(address(8008), true);
 
         vm.prank(address(1337));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         vm.prank(address(8008));
-        puddle.burnAsEOA(address(mock), tokenId);
+        aqua.burnAsEOA(address(mock), tokenId);
     }
 
     function testTBACanBurn() public {
@@ -142,7 +142,7 @@ contract MyPuddleTest is Test {
         mock.mint(address(1337), tokenId);
 
         vm.prank(address(1337));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         address accountAddress = accountRegistry.createAccount(
             address(mock),
@@ -153,7 +153,7 @@ contract MyPuddleTest is Test {
 
         vm.prank(address(1337));
         account.executeCall(
-            address(puddle),
+            address(aqua),
             0,
             abi.encodeWithSignature("burn(uint256)", tokenId)
         );
@@ -165,7 +165,7 @@ contract MyPuddleTest is Test {
         mock.mint(address(1337), tokenId);
 
         vm.prank(address(1337));
-        puddle.safeMint(address(mock), tokenId);
+        aqua.safeMint(address(mock), tokenId);
 
         address accountAddress = accountRegistry.createAccount(
             address(mock),
@@ -177,7 +177,7 @@ contract MyPuddleTest is Test {
         vm.prank(address(8008));
         vm.expectRevert(TBA.NotAuthorized.selector);
         account.executeCall(
-            address(puddle),
+            address(aqua),
             0,
             abi.encodeWithSignature("burn(uint256)", tokenId)
         );
