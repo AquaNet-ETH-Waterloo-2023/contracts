@@ -17,12 +17,28 @@ contract AquaNetTest is Test {
 
     AquaNet public aqua;
 
+    event AquaCreated(
+        address indexed tokenAddress,
+        uint256 tokenId,
+        uint256 aquaId
+    );
+
     function setUp() public {
         ccExecutorList = new CrossChainExecutorList();
         implementation = new TBA(address(ccExecutorList));
         accountRegistry = new AccountRegistry(address(implementation));
 
         aqua = new AquaNet(address(accountRegistry));
+    }
+
+    function testEmit() public {
+        MockERC721 mock = new MockERC721();
+        mock.mint(address(1337), 1);
+
+        vm.prank(address(1337));
+        vm.expectEmit();
+        emit AquaCreated(address(mock), 1, 1);
+        aqua.safeMint(address(mock), 1);
     }
 
     function testCanOnlyMintOnce() public {

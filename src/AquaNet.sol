@@ -17,8 +17,12 @@ contract AquaNet is ERC721, Ownable {
 
     address public tokenBoundRegistry;
     Counters.Counter private _tokenIdCounter;
-    mapping(address => uint256) public addressToTokenId;
-    mapping(uint256 => Token) public puddleIdToToken;
+
+    event AquaCreated(
+        address indexed tokenAddress,
+        uint256 tokenId,
+        uint256 aquaId
+    );
 
     constructor(address tokenBoundRegistry_) ERC721("AquaNet", "AQUA") {
         tokenBoundRegistry = tokenBoundRegistry_;
@@ -60,6 +64,7 @@ contract AquaNet is ERC721, Ownable {
         _tokenIdCounter.increment();
         uint256 puddleTokenId = _tokenIdCounter.current();
         _safeMint(tokenBoundAddress, puddleTokenId);
+        emit AquaCreated(tokenAddress, tokenId, puddleTokenId);
     }
 
     // If you are an owner or approved address, you can burn the token
