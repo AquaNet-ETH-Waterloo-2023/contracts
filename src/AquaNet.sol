@@ -10,11 +10,6 @@ import "erc6551/ERC6551Registry.sol";
 contract AquaNet is ERC721, Ownable {
     using Counters for Counters.Counter;
 
-    struct Token {
-        address tokenAddress;
-        uint256 tokenId;
-    }
-
     address public tokenBoundRegistry;
     address public erc6551ImplementationAddress;
     Counters.Counter private _tokenIdCounter;
