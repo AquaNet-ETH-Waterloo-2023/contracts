@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "openzeppelin-contracts/token/ERC721/ERC721.sol";
 import "openzeppelin-contracts/utils/Counters.sol";
 import "openzeppelin-contracts/access/Ownable.sol";
-import "tokenbound/AccountRegistry.sol";
+import "erc6551/ERC6551Registry.sol";
 
 // Soulbound ERC721 token for AquaNet profiles
 contract AquaNet is ERC721, Ownable {
@@ -16,6 +16,7 @@ contract AquaNet is ERC721, Ownable {
     }
 
     address public tokenBoundRegistry;
+    address public erc6551ImplementationAddress;
     Counters.Counter private _tokenIdCounter;
 
     event AquaCreated(
@@ -24,8 +25,12 @@ contract AquaNet is ERC721, Ownable {
         uint256 aquaId
     );
 
-    constructor(address tokenBoundRegistry_) ERC721("AquaNet", "AQUA") {
+    constructor(
+        address tokenBoundRegistry_,
+        address erc6551ImplementationAddress_
+    ) ERC721("AquaNet", "AQUA") {
         tokenBoundRegistry = tokenBoundRegistry_;
+        erc6551ImplementationAddress = erc6551ImplementationAddress_;
     }
 
     modifier onlyApprovedOrOwner(address tokenAddress, uint256 tokenId) {
@@ -49,9 +54,12 @@ contract AquaNet is ERC721, Ownable {
         address tokenAddress,
         uint tokenId
     ) public onlyApprovedOrOwner(tokenAddress, tokenId) {
-        address tokenBoundAddress = AccountRegistry(tokenBoundRegistry).account(
+        address tokenBoundAddress = ERC6551Registry(tokenBoundRegistry).account(
+            erc6551ImplementationAddress,
+            block.chainid,
             tokenAddress,
-            tokenId
+            tokenId,
+            0
         );
         require(
             balanceOf(tokenBoundAddress) == 0,

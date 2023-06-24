@@ -4,6 +4,12 @@
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "lib/tokenbound"]
-	path = lib/tokenbound
+[submodule "lib/tokenbound-account"]
+	path = lib/tokenbound-account
 	url = https://github.com/tokenbound/contracts
+[submodule "lib/account-abstraction"]
+	path = lib/account-abstraction
+	url = https://github.com/eth-infinitism/account-abstraction
+[submodule "lib/reference"]
+	path = lib/reference
+	url = https://github.com/erc6551/reference

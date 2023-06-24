@@ -1,1 +1,2 @@
 openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
+erc6551/=lib/reference/src/

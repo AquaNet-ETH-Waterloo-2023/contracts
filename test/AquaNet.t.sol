@@ -2,18 +2,23 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import {Account as TBA} from "tokenbound/Account.sol";
-import "tokenbound/AccountRegistry.sol";
-import "tokenbound/CrossChainExecutorList.sol";
+import {Account as TBA, NotAuthorized} from "tokenbound-account/src/Account.sol";
+import "tokenbound-account/src/AccountGuardian.sol";
+import "tokenbound-account/src/AccountProxy.sol";
+import "account-abstraction/core/EntryPoint.sol";
+import "erc6551/ERC6551Registry.sol";
+
 import "./mocks/MockERC721.sol";
 import "./mocks/MockERC20.sol";
 
 import "src/AquaNet.sol";
 
 contract AquaNetTest is Test {
-    CrossChainExecutorList ccExecutorList;
     TBA implementation;
-    AccountRegistry public accountRegistry;
+    ERC6551Registry public registry;
+    AccountGuardian public guardian;
+    AccountProxy public proxy;
+    IEntryPoint public entryPoint;
 
     AquaNet public aqua;
 
@@ -24,11 +29,14 @@ contract AquaNetTest is Test {
     );
 
     function setUp() public {
-        ccExecutorList = new CrossChainExecutorList();
-        implementation = new TBA(address(ccExecutorList));
-        accountRegistry = new AccountRegistry(address(implementation));
+        entryPoint = new EntryPoint();
+        guardian = new AccountGuardian();
+        implementation = new TBA(address(guardian), address(entryPoint));
+        proxy = new AccountProxy(address(implementation));
 
-        aqua = new AquaNet(address(accountRegistry));
+        registry = new ERC6551Registry();
+
+        aqua = new AquaNet(address(registry), address(implementation));
     }
 
     function testEmit() public {
@@ -160,9 +168,13 @@ contract AquaNetTest is Test {
         vm.prank(address(1337));
         aqua.safeMint(address(mock), tokenId);
 
-        address accountAddress = accountRegistry.createAccount(
+        address accountAddress = registry.createAccount(
+            address(implementation),
+            block.chainid,
             address(mock),
-            tokenId
+            tokenId,
+            0,
+            ""
         );
         vm.deal(accountAddress, 1 ether);
         TBA account = TBA(payable(accountAddress));
@@ -183,15 +195,19 @@ contract AquaNetTest is Test {
         vm.prank(address(1337));
         aqua.safeMint(address(mock), tokenId);
 
-        address accountAddress = accountRegistry.createAccount(
+        address accountAddress = registry.createAccount(
+            address(implementation),
+            block.chainid,
             address(mock),
-            tokenId
+            tokenId,
+            0,
+            ""
         );
         vm.deal(accountAddress, 1 ether);
         TBA account = TBA(payable(accountAddress));
 
         vm.prank(address(8008));
-        vm.expectRevert(TBA.NotAuthorized.selector);
+        vm.expectRevert(NotAuthorized.selector);
         account.executeCall(
             address(aqua),
             0,
